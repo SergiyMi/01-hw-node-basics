@@ -1,0 +1,28 @@
+{
+  "name": "01-hw-node-basics",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SergiyMi/01-hw-node-basics.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SergiyMi/01-hw-node-basics/issues"
+  },
+  "homepage": "https://github.com/SergiyMi/01-hw-node-basics#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  },
+  "dependencies": {
+    "yargs": "^15.1.0"
+  }
+}
