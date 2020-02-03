@@ -1,30 +1,11 @@
 const fs = require("fs");
 const path = require("path");
+const shortid = require("shortid");
 
 const contactsPath = path.join(__dirname, "db", "contacts.json");
 
-function invokeAction({ action, id, name, email, phone }) {
-  switch (action) {
-    case "list":
-      listContacts();
-      break;
-
-    case "get":
-      getContactById(id);
-      break;
-
-    case "add":
-      addContact(name, email, phone);
-      break;
-
-    case "remove":
-      removeContact(id);
-      break;
-  }
-}
-
 function listContacts() {
-  fs.readFile(contactsPath, "utf8", (err, data) => {
+  fs.readFile(contactsPath, { encoding: "utf-8" }, (err, data) => {
     if (err) {
       throw err;
     }
@@ -36,7 +17,7 @@ function listContacts() {
 }
 
 function getContactById(contactId) {
-  fs.readFile(contactsPath, "utf8", (err, data) => {
+  fs.readFile(contactsPath, { encoding: "utf-8" }, (err, data) => {
     if (err) {
       return console.error(err);
     }
@@ -45,35 +26,38 @@ function getContactById(contactId) {
       ? console.log("This file is empty")
       : ((parser = JSON.parse(data).find(contact => contact.id === contactId)),
         console.log(parser));
+    if (!parser) {
+      return console.log({ Status: 404, message: "Not found" });
+    }
   });
 }
 
 function removeContact(contactId) {
-  fs.readFile(contactsPath, "utf8", (err, data) => {
+  fs.readFile(contactsPath, { encoding: "utf-8" }, (err, data) => {
     if (err) throw err;
     if (data.length < 1) {
       console.log("File is empty");
       return;
     }
+    const space = "  ";
     const parser = JSON.parse(data).find(contact => contact.id === contactId);
     if (!parser) {
       console.log("Contact with this id not found");
       return;
     }
 
-    const firstIndex = data.indexOf(`"id": ${contactId}`) - 6;
-    const secondSubstr = data.substring(firstIndex, data.length);
-    const secondIndex = secondSubstr.indexOf("}");
-    const firstSubstring = data.substring(0, firstIndex);
-    const secondSubstring = data.substring(firstIndex + secondIndex + 5);
-    let resultString = firstSubstring + secondSubstring;
-    if (!resultString.includes("]")) {
-      console.log("This is last contact");
-      resultString = resultString.substring(0, resultString.length - 4) + "\n]";
-    }
-    console.log(resultString);
+    const newData = JSON.parse(data).filter(
+      contact => contact.id !== contactId
+    );
+    let par = newData.map(
+      pa =>
+        (pa = `\n${space}{ \n  ${space}"id": "${pa.id}", \n  ${space}"name": "${pa.name}", \n  ${space}"email": "${pa.email}", \n  ${space}"phone": "${pa.phone}" \n${space}}`)
+    );
+    str1 = "[";
+    str2 = "\n]\n";
+    str = str1 + par + str2;
 
-    fs.writeFile(contactsPath, resultString, function(err) {
+    fs.writeFile(contactsPath, str, function(err) {
       if (err) throw err;
       console.log(`contact with id: ${contactId} deleted`);
     });
@@ -81,24 +65,29 @@ function removeContact(contactId) {
 }
 
 function addContact(name, email, phone) {
-  fs.readFile(contactsPath, "utf8", (err, data) => {
+  fs.readFile(contactsPath, { encoding: "utf-8" }, (err, data) => {
     if (err) {
       return console.error(err);
     }
-    let id = null;
+    const id = shortid.generate();
     const space = "  ";
-    data.length < 1 ? (id = 1) : (id = JSON.parse(data).length + 1);
-    const newData = `\n${space}{ \n  ${space}"id": ${id}, \n  ${space}"name": "${name}", \n  ${space}"email": "${email}", \n  ${space}"phone": "${phone}" \n${space}}`;
+    if (data.length < 1) data = "[]";
+    let parser = JSON.parse(data);
 
-    data.length < 1
-      ? (str = "[" + String(newData) + "\n]")
-      : ((str = data.substring(0, data.length - 3)),
-        (str =
-          str +
-          "," +
-          String(newData) +
-          data.substring(data.length - 3, data.length)));
-    console.log(str);
+    const newData = {
+      id: `${id}`,
+      name,
+      email,
+      phone
+    };
+    parser = [...parser, newData];
+    let par = parser.map(
+      pa =>
+        (pa = `\n${space}{ \n  ${space}"id": "${pa.id}", \n  ${space}"name": "${pa.name}", \n  ${space}"email": "${pa.email}", \n  ${space}"phone": "${pa.phone}" \n${space}}`)
+    );
+    str1 = "[";
+    str2 = "\n]\n";
+    str = str1 + par + str2;
 
     fs.writeFile(contactsPath, str, function(err) {
       if (err) throw err;
@@ -107,4 +96,46 @@ function addContact(name, email, phone) {
   });
 }
 
-module.exports = { invokeAction };
+function updateContact(contactId, name, email, phone) {
+  fs.readFile(contactsPath, { encoding: "utf-8" }, (err, data) => {
+    if (err) {
+      return console.error(err);
+    }
+
+    const space = "  ";
+    if (data.length < 1) data = "[]";
+    let parser = JSON.parse(data);
+
+    let par = parser.map(pa => {
+      let temp = pa.id;
+      if (typeof temp === "number") temp = JSON.stringify(temp);
+      if (temp === contactId) {
+        pa = `\n${space}{ \n  ${space}"id": "${pa.id}", \n  ${space}"name": "${name}", \n  ${space}"email": "${email}", \n  ${space}"phone": "${phone}" \n${space}}`;
+        return JSON.parse(pa);
+      }
+      return pa;
+    });
+
+    par = par.map(pa => {
+      pa = `\n${space}{ \n  ${space}"id": "${pa.id}", \n  ${space}"name": "${pa.name}", \n  ${space}"email": "${pa.email}", \n  ${space}"phone": "${pa.phone}" \n${space}}`;
+      return pa;
+    });
+
+    str1 = "[";
+    str2 = "\n]\n";
+    str = str1 + par + str2;
+
+    fs.writeFile(contactsPath, str, function(err) {
+      if (err) throw err;
+      console.log("update");
+    });
+  });
+}
+
+module.exports = {
+  listContacts,
+  getContactById,
+  removeContact,
+  addContact,
+  updateContact
+};

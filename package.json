@@ -20,9 +20,13 @@
   },
   "homepage": "https://github.com/SergiyMi/01-hw-node-basics#readme",
   "devDependencies": {
+    "morgan": "^1.9.1",
     "nodemon": "^2.0.2"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "shortid": "^2.2.15",
     "yargs": "^15.1.0"
   }
 }
