@@ -13,7 +13,7 @@ router.get("/:contactId", (req, res) => {
 
 router.post("/", (req, res) => {
   const { name, email, phone } = req.body;
-  if (name || email || phone) {
+  if (!name || !email || !phone) {
     res.status(400).json({ message: "missing required name field" });
   }
   const result = contacts.addContact(name, email, phone);
