@@ -1,117 +1,61 @@
 const fs = require("fs");
 const path = require("path");
 const shortid = require("shortid");
+const Contact = require("./model/contact");
 
 const contactsPath = path.join(__dirname, "db", "contacts.json");
 
-function listContacts() {
-  fs.readFile(contactsPath, { encoding: "utf-8" }, (err, data) => {
-    if (err) {
-      throw err;
-    }
-    data.length < 1
-      ? console.log("This file is empty")
-      : console.table(JSON.parse(data));
-    return JSON.parse(data);
-  });
+async function listContacts() {
+  try {
+    const contacts = await Contact.find();
+    return contacts;
+  } catch (error) {
+    console.log("error: ", error);
+  }
 }
 
-function getContactById(contactId) {
-  fs.readFile(contactsPath, { encoding: "utf-8" }, (err, data) => {
-    if (err) {
-      return console.error(err);
-    }
-    let parser = null;
-    data.length < 1
-      ? console.log("This file is empty")
-      : ((parser = JSON.parse(data).find(
-          contact => String(contact.id) === contactId
-        )),
-        console.log(parser));
-    if (!parser) {
-      return console.log({ Status: 404, message: "Not found" });
-    }
-  });
+async function getContactById(contactId) {
+  try {
+    const result = Contact.findById(contactId);
+    return result;
+  } catch (error) {
+    console.log("error: ", error);
+  }
 }
 
-function removeContact(contactId) {
-  fs.readFile(contactsPath, { encoding: "utf-8" }, (err, data) => {
-    if (err) throw err;
-    if (data.length < 1) {
-      console.log("File is empty");
-      return;
-    }
-    const parser = JSON.parse(data).find(
-      contact => String(contact.id) === contactId
+async function removeContact(contactId) {
+  try {
+    const result = Contact.findOneAndDelete({ _id: contactId });
+    return result;
+  } catch (error) {
+    console.log("error: ", error);
+  }
+}
+
+async function addContact(name, email, phone) {
+  const id = shortid.generate();
+  const newData = {
+    id: `${id}`,
+    name,
+    email,
+    phone
+  };
+  const newContact = new Contact(newData);
+  const result = await newContact.save();
+  return result;
+}
+
+async function updateContact(contactId, newFields) {
+  try {
+    const result = await Contact.findOneAndUpdate(
+      { _id: contactId },
+      { $set: newFields },
+      { new: true }
     );
-    if (!parser) {
-      console.log("Contact with this id not found");
-      return;
-    }
-
-    const newData = JSON.parse(data).filter(
-      contact => String(contact.id) !== contactId
-    );
-
-    fs.writeFile(contactsPath, JSON.stringify(newData, null, "  "), function(
-      err
-    ) {
-      if (err) throw err;
-      console.log(`contact with id: ${contactId} deleted`);
-    });
-  });
-}
-
-function addContact(name, email, phone) {
-  fs.readFile(contactsPath, { encoding: "utf-8" }, (err, data) => {
-    if (err) {
-      return console.error(err);
-    }
-    const id = shortid.generate();
-    const space = "  ";
-    if (data.length < 1) data = "[]";
-    let parser = JSON.parse(data);
-
-    const newData = {
-      id: `${id}`,
-      name,
-      email,
-      phone
-    };
-    parser = [...parser, newData];
-
-    fs.writeFile(contactsPath, JSON.stringify(parser, null, "  "), function(
-      err
-    ) {
-      if (err) throw err;
-      console.log("replace");
-    });
-  });
-}
-
-function updateContact(contactId, name, email, phone) {
-  fs.readFile(contactsPath, { encoding: "utf-8" }, (err, data) => {
-    if (err) {
-      return console.error(err);
-    }
-
-    if (data.length < 1) data = "[]";
-    let parser = JSON.parse(data);
-
-    const par = parser.map(contact => {
-      if (String(contact.id) === contactId) {
-        contact.name = name;
-        contact.email = email;
-        contact.phone = phone;
-      }
-      return contact;
-    });
-
-    fs.writeFile(contactsPath, JSON.stringify(par, null, "  "), function(err) {
-      if (err) throw err;
-      console.log("update");
-    });
-  });
+    return result;
+  } catch (error) {
+    console.log("error: ", error);
+  }
 }
 
 module.exports = {
