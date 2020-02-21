@@ -1,16 +1,18 @@
 const mongoose = require("mongoose");
+const { mongodbUri } = require("../config/config");
+
+const option = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
+  connectTimeoutMS: 5000,
+  serverSelectionTimeoutMS: 5000
+};
 
 async function dbConnection() {
   try {
-    await mongoose.connect(
-      "mongodb+srv://FirstUser:First-2020@cluster0-wkkpz.mongodb.net/db-contacts?retryWrites=true&w=majority",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        connectTimeoutMS: 5000,
-        serverSelectionTimeoutMS: 5000
-      }
-    );
+    await mongoose.connect(mongodbUri, option);
   } catch (err) {
     console.log("err: ", err);
     process.exit(1);

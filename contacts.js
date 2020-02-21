@@ -1,9 +1,5 @@
-const fs = require("fs");
-const path = require("path");
 const shortid = require("shortid");
 const Contact = require("./model/contact");
-
-const contactsPath = path.join(__dirname, "db", "contacts.json");
 
 async function listContacts() {
   try {

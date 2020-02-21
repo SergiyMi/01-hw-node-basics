@@ -1,12 +1,15 @@
 {
   "name": "01-hw-node-basics",
   "version": "1.0.0",
-  "description": "",
+  "description": "ShortUrl",
   "main": "index.js",
+  "engines": {
+    "node": "10.16.3"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "cross-env NODE_ENV=development nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -24,9 +27,17 @@
     "nodemon": "^2.0.2"
   },
   "dependencies": {
+    "bcrypt": "^3.0.8",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-react-views": "^0.11.0",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.8.13",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-router-dom": "^5.1.2",
     "shortid": "^2.2.15",
     "yargs": "^15.1.0"
   }
